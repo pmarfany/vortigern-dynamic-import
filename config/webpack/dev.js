@@ -20,7 +20,6 @@ var config = {
     app: [
       'webpack-hot-middleware/client?reload=true',
       './src/client.tsx',
-      './src/vendor/main.ts'
     ]
   },
 
@@ -32,11 +31,7 @@ var config = {
   },
 
   module: {
-    rules: [{
-        enforce: 'pre',
-        test: /\.tsx?$/,
-        loader: 'tslint-loader'
-      },
+    rules: [
       {
         test: /\.tsx?$/,
         loaders: ['react-hot-loader/webpack', 'awesome-typescript-loader']

@@ -8,11 +8,10 @@ import * as React from 'react';
 import * as ReactDOMServer from 'react-dom/server';
 
 import { Provider } from 'react-redux';
-import { createMemoryHistory, match } from 'react-router';
-import { syncHistoryWithStore } from 'react-router-redux';
-const { ReduxAsyncConnect, loadOnServer } = require('redux-connect');
+import { StaticRouter } from 'react-router';
+import {createMemoryHistory} from 'history';
 import { configureStore } from './app/redux/store';
-import routes from './app/routes';
+import Routes from './app/routes';
 
 import { Html } from './app/containers';
 const manifest = require('../build/manifest.json');
@@ -52,31 +51,17 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.get('*', (req, res) => {
   const location = req.url;
-  const memoryHistory = createMemoryHistory(req.originalUrl);
+  const memoryHistory = createMemoryHistory(req.url);
   const store = configureStore(memoryHistory);
-  const history = syncHistoryWithStore(memoryHistory, store);
 
-  match({ history, routes, location },
-    (error, redirectLocation, renderProps) => {
-      if (error) {
-        res.status(500).send(error.message);
-      } else if (redirectLocation) {
-        res.redirect(302, redirectLocation.pathname + redirectLocation.search);
-      } else if (renderProps) {
-        const asyncRenderData = Object.assign({}, renderProps, { store });
-
-        loadOnServer(asyncRenderData).then(() => {
-          const markup = ReactDOMServer.renderToString(
-            <Provider store={store} key="provider">
-              <ReduxAsyncConnect {...renderProps} />
-            </Provider>,
-          );
-          res.status(200).send(renderHTML(markup, store));
-        });
-      } else {
-        res.status(404).send('Not Found?');
-      }
-    });
+  const markup = ReactDOMServer.renderToString(
+    <Provider store={store} key="provider">
+      <StaticRouter location={location} context={{}}>
+        <Routes/>
+      </StaticRouter>
+    </Provider>,
+  );
+  res.status(200).send(renderHTML(markup, store));
 });
 
 app.listen(appConfig.port, appConfig.host, (err) => {
