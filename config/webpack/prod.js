@@ -18,7 +18,6 @@ var config = {
   entry: {
     app: './src/client.tsx',
     vendor: [
-      './src/vendor/main.ts',
       'react',
       'react-dom',
       'react-router',
@@ -27,7 +26,6 @@ var config = {
       'react-router-redux',
       'redux',
       'redux-connect',
-      'redux-thunk'
     ]
   },
 
@@ -38,11 +36,7 @@ var config = {
   },
 
   module: {
-    rules: [{
-        enforce: 'pre',
-        test: /\.tsx?$/,
-        loader: 'tslint-loader'
-      },
+    rules: [
       {
         test: /\.tsx?$/,
         loader: 'awesome-typescript-loader'
