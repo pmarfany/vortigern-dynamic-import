@@ -13,7 +13,7 @@ class Html extends React.Component<IHtmlProps, {}> {
   private resolve(files) {
     return files.map((src) => {
       if (!this.props.manifest[src]) { return; }
-      return '/public/' + this.props.manifest[src];
+      return this.props.manifest[src];
     }).filter((file) => file !== undefined);
   }
 

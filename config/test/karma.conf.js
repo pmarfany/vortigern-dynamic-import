@@ -133,7 +133,6 @@ module.exports = function (config) {
         }),
         new webpack.IgnorePlugin(/^fs$/),
         new webpack.IgnorePlugin(/^react\/addons$/),
-        new webpack.NoEmitOnErrorsPlugin(),
         new webpack.DefinePlugin({
           'process.env': {
             BROWSER: JSON.stringify(true),

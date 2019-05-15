@@ -1,15 +1,14 @@
 var fs = require('fs');
 var path = require('path');
 var webpack = require('webpack');
-var postcssAssets = require('postcss-assets');
-var postcssNext = require('postcss-cssnext');
-var stylelint = require('stylelint');
 var ManifestPlugin = require('webpack-manifest-plugin');
 var CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
+var getEnv = require('./utils/getEnv');
 
 var config = {
   // Enable sourcemaps for debugging webpack's output.
   devtool: 'source-map',
+  mode: getEnv(),
 
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -34,53 +33,56 @@ var config = {
     rules: [
       {
         test: /\.tsx?$/,
-        loaders: ['react-hot-loader/webpack', 'awesome-typescript-loader']
+        use: ['react-hot-loader/webpack', 'awesome-typescript-loader']
       },
       {
         test: /\.jsx$/,
-        loader: 'babel-loader'
-      },
-      {
-        test: /\.json$/,
-        loader: 'json-loader'
+        use: 'babel-loader'
       },
       {
         test: /\.css$/,
         include: path.resolve('./src/app'),
-        loaders: [
+        use: [
           'style-loader',
           'css-loader?modules&importLoaders=2&localIdentName=[local]___[hash:base64:5]',
-          'postcss-loader'
+          {
+            loader: 'postcss-loader',
+            options: {
+              ident: 'postcss',
+              plugins: () => [
+                require('stylelint')({ files: '../../src/app/*.css' }),
+                require('postcss-cssnext')(),
+                require('postcss-assets')({ relative: true })
+              ]
+            }
+          }
         ]
       },
       {
         test: /\.css$/,
         exclude: path.resolve('./src/app'),
-        loaders: [
-          'style-loader',
-          'css-loader'
-        ]
+        use: ['style-loader', 'css-loader']
       },
 
       {
         test: /\.eot(\?.*)?$/,
-        loader: 'file-loader?name=fonts/[hash].[ext]'
+        use: 'file-loader?name=fonts/[hash].[ext]'
       },
       {
         test: /\.(woff|woff2)(\?.*)?$/,
-        loader: 'file-loader?name=fonts/[hash].[ext]'
+        use: 'file-loader?name=fonts/[hash].[ext]'
       },
       {
         test: /\.ttf(\?.*)?$/,
-        loader: 'url-loader?limit=10000&mimetype=application/octet-stream&name=fonts/[hash].[ext]'
+        use: 'url-loader?limit=10000&mimetype=application/octet-stream&name=fonts/[hash].[ext]'
       },
       {
         test: /\.svg(\?.*)?$/,
-        loader: 'url-loader?limit=10000&mimetype=image/svg+xml&name=fonts/[hash].[ext]'
+        use: 'url-loader?limit=10000&mimetype=image/svg+xml&name=fonts/[hash].[ext]'
       },
       {
         test: /\.(jpe?g|png|gif)$/i,
-        loader: 'url-loader?limit=1000&name=images/[hash].[ext]'
+        use: 'url-loader?limit=1000&name=images/[hash].[ext]'
       }
     ]
   },
@@ -90,31 +92,18 @@ var config = {
     new webpack.LoaderOptionsPlugin({
       debug: true,
       options: {
-        tslint: {
-          failOnHint: true
-        },
-        postcss: function () {
-          return [
-            stylelint({
-              files: '../../src/app/*.css'
-            }),
-            postcssNext(),
-            postcssAssets({
-              relative: true
-            }),
-          ];
-        },
+        tslint: { failOnHint: true },
       }
     }),
     new ManifestPlugin({
       fileName: '../manifest.json'
     }),
-    new webpack.DefinePlugin({
+    /*new webpack.DefinePlugin({
       'process.env': {
         BROWSER: JSON.stringify(true),
         NODE_ENV: JSON.stringify('development')
       }
-    }),
+    }),*/
     new webpack.HotModuleReplacementPlugin()
   ]
 };

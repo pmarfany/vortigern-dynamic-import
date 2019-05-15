@@ -1,8 +1,6 @@
 var path = require('path');
 var fs = require('fs');
-var webpack = require('webpack');
-var postcssAssets = require('postcss-assets');
-var postcssNext = require('postcss-cssnext');
+var getEnv = require('./utils/getEnv');
 
 var nodeModules = {};
 fs.readdirSync('node_modules')
@@ -16,6 +14,7 @@ fs.readdirSync('node_modules')
 var config = {
   externals: nodeModules,
   target: 'node',
+  mode: getEnv(),
 
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -32,56 +31,36 @@ var config = {
   },
 
   module: {
-    loaders: [{
+    rules: [{
         test: /\.(jpe?g|png|gif)$/i,
-        loader: 'url-loader?limit=1000&name=images/[hash].[ext]'
-      },
-      {
-        test: /\.json$/,
-        loader: 'json-loader'
+        use: 'url-loader?limit=1000&name=images/[hash].[ext]'
       },
       {
         test: /\.jsx$/,
-        loader: 'babel-loader'
+        use: 'babel-loader'
       },
       {
         test: /\.tsx?$/,
-        loader: 'awesome-typescript-loader',
+        use: 'awesome-typescript-loader',
         exclude: /node_modules/
       },
       {
         test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-        loader: "url-loader?limit=10000&mimetype=application/font-woff"
+        use: "url-loader?limit=10000&mimetype=application/font-woff"
       },
       {
         test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-        loader: "file-loader"
+        use: "file-loader"
       },
       {
         test: /\.css$/,
-        loaders: [
+        use: [
           'isomorphic-style-loader',
           'css-loader?modules&importLoaders=2&localIdentName=[local]___[hash:base64:5]'
         ]
       }
     ]
   },
-
-  plugins: [
-      new webpack.LoaderOptionsPlugin({
-        debug: false,
-        options: {
-          postcss: function () {
-            return [
-              postcssNext(),
-              postcssAssets({
-                relative: true
-              }),
-            ];
-          },
-        }
-      })
-  ],
 
   node: {
     console: false,
