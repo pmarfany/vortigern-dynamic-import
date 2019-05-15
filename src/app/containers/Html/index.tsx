@@ -1,7 +1,7 @@
 import { IStore } from 'redux/IStore';
 import * as React from 'react';
 import { Helmet } from 'react-helmet';
-import * as serialize from 'serialize-javascript';
+import serialize from 'serialize-javascript';
 
 interface IHtmlProps {
   manifest?: any;

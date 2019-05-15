@@ -2,7 +2,6 @@ var fs = require('fs');
 var path = require('path');
 var webpack = require('webpack');
 var ManifestPlugin = require('webpack-manifest-plugin');
-var CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 var getEnv = require('./utils/getEnv');
 
 var config = {
@@ -33,7 +32,7 @@ var config = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: ['react-hot-loader/webpack', 'awesome-typescript-loader']
+        use: ['react-hot-loader/webpack', 'ts-loader']
       },
       {
         test: /\.jsx$/,
@@ -88,7 +87,6 @@ var config = {
   },
 
   plugins: [
-    new CheckerPlugin(),
     new webpack.LoaderOptionsPlugin({
       debug: true,
       options: {

@@ -1,5 +1,6 @@
 var path = require('path');
 var fs = require('fs');
+var webpack = require('webpack');
 var getEnv = require('./utils/getEnv');
 
 var nodeModules = {};
@@ -41,7 +42,7 @@ var config = {
       },
       {
         test: /\.tsx?$/,
-        use: 'awesome-typescript-loader',
+        use: 'ts-loader',
         exclude: /node_modules/
       },
       {
@@ -61,6 +62,10 @@ var config = {
       }
     ]
   },
+
+  plugins: [
+    new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
+  ],
 
   node: {
     console: false,

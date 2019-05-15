@@ -8,7 +8,9 @@
       ]
     },
     "outDir": "build",
-    "module": "commonjs",
+    "module": "esnext",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "target": "es6",
     "sourceMap": true,
     "inlineSourceMap": false,
