@@ -37,11 +37,20 @@ var config = {
         use: 'url-loader?limit=1000&name=images/[hash].[ext]'
       },
       {
-        test: /\.jsx$/,
-        use: 'babel-loader'
+        test: /\.(js|jsx|ts|tsx)?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            plugins: [
+              require('@babel/plugin-syntax-dynamic-import').default,
+              require('react-loadable/babel').default,
+            ],
+          }
+        }
       },
       {
-        test: /\.tsx?$/,
+        test: /\.(ts|tsx)?$/,
         use: 'ts-loader',
         exclude: /node_modules/
       },

@@ -1,11 +1,12 @@
 const appConfig = require('../config/main');
 
-import * as e6p from 'es6-promise';
-(e6p as any).polyfill();
+import 'es6-promise/auto';
 import 'isomorphic-fetch';
 
 import * as React from 'react';
 import * as ReactDOMServer from 'react-dom/server';
+import Loadable from 'react-loadable';
+import {getBundles} from 'react-loadable-ssr-addon';
 
 import { Provider } from 'react-redux';
 import { StaticRouter } from 'react-router';
@@ -15,6 +16,7 @@ import Routes from './app/routes';
 
 import { Html } from './app/containers';
 const manifest = require('../build/manifest.json');
+const stats = require('../build/assets-manifest.json');
 
 const express = require('express');
 const path = require('path');
@@ -53,30 +55,43 @@ app.get('*', (req, res) => {
   const location = req.url;
   const memoryHistory = createMemoryHistory(req.url);
   const store = configureStore(memoryHistory);
+  const modules = [];
 
   const markup = ReactDOMServer.renderToString(
-    <Provider store={store} key="provider">
-      <StaticRouter location={location} context={{}}>
-        <Routes/>
-      </StaticRouter>
-    </Provider>,
+    <Loadable.Capture report={(moduleName) => {
+      console.log('Capturing module', moduleName);
+      modules.push(moduleName);
+    }}>
+      <Provider store={store} key="provider">
+        <StaticRouter location={location} context={{}}>
+          <Routes/>
+        </StaticRouter>
+      </Provider>
+    </Loadable.Capture>,
   );
-  res.status(200).send(renderHTML(markup, store));
+
+  const modulesToBeLoaded = [...stats.entrypoints, ...modules];
+  console.log(location, modulesToBeLoaded);
+  const bundles = getBundles(stats, modulesToBeLoaded);
+
+  res.status(200).send(renderHTML(markup, store, bundles));
 });
 
-app.listen(appConfig.port, appConfig.host, (err) => {
-  if (err) {
-    console.error(Chalk.bgRed(err));
-  } else {
-    console.info(Chalk.black.bgGreen(
-      `\n\n💂  Listening at http://${appConfig.host}:${appConfig.port}\n`,
-    ));
-  }
+Loadable.preloadAll().then(() => {
+  app.listen(appConfig.port, appConfig.host, (err) => {
+    if (err) {
+      console.error(Chalk.bgRed(err));
+    } else {
+      console.info(Chalk.black.bgGreen(
+        `\n\n💂  Listening at http://${appConfig.host}:${appConfig.port}\n`,
+      ));
+    }
+  });
 });
 
-function renderHTML(markup: string, store: any) {
+function renderHTML(markup: string, store: any, bundles: any) {
   const html = ReactDOMServer.renderToString(
-    <Html markup={markup} manifest={manifest} store={store} />,
+    <Html markup={markup} manifest={manifest} store={store} bundles={bundles} />,
   );
 
   return `<!doctype html> ${html}`;

@@ -3,6 +3,7 @@ var path = require('path');
 var webpack = require('webpack');
 var ManifestPlugin = require('webpack-manifest-plugin');
 var MiniCssExtractPlugin = require("mini-css-extract-plugin");
+var ReactLoadableSSRAddon = require("react-loadable-ssr-addon");
 var getEnv = require('./utils/getEnv');
 
 var config = {
@@ -36,12 +37,36 @@ var config = {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
-        use: 'ts-loader'
+        test: /\.(js|jsx|ts|tsx)?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: [
+              "@babel/preset-typescript",
+              "@babel/preset-react",
+              ["@babel/preset-env",
+                {
+                  "targets": {
+                    "browsers": ["last 2 versions"],
+                  },
+                },
+              ],
+            ],
+            plugins: [
+              require("@babel/plugin-transform-modules-commonjs").default,
+              require("@babel/plugin-proposal-object-rest-spread").default,
+              require("@babel/plugin-syntax-dynamic-import").default,
+              require("@babel/plugin-transform-runtime").default,
+              require("react-loadable/babel").default,
+            ],
+          },
+        },
       },
       {
-        test: /\.jsx$/,
-        use: 'babel-loader'
+        test: /\.(ts|tsx)?$/,
+        exclude: /node_modules/,
+        use: ['ts-loader']
       },
       {
         test: /\.css$/,
@@ -106,12 +131,9 @@ var config = {
     new ManifestPlugin({
       fileName: '../manifest.json'
     }),
-    /*new webpack.DefinePlugin({
-      'process.env': {
-        BROWSER: JSON.stringify(true),
-        NODE_ENV: JSON.stringify('production')
-      }
-    })*/
+    new ReactLoadableSSRAddon({
+      filename: "../assets-manifest.json",
+    }),
   ]
 };
 

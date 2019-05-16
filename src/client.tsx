@@ -1,5 +1,4 @@
-import * as e6p from 'es6-promise';
-(e6p as any).polyfill();
+import 'es6-promise/auto';
 import 'isomorphic-fetch';
 
 import * as React from 'react';
@@ -10,6 +9,7 @@ import { configureStore } from './app/redux/store';
 import 'isomorphic-fetch';
 import Routes from './app/routes';
 import {createBrowserHistory} from 'history';
+import {preloadReady} from 'react-loadable';
 
 const browserHistory = createBrowserHistory();
 const store = configureStore(
@@ -17,11 +17,13 @@ const store = configureStore(
   window.__INITIAL_STATE__,
 );
 
-ReactDOM.hydrate(
-  <Provider store={store} key="provider">
-    <Router history={browserHistory}>
-      <Routes />
-    </Router>
-  </Provider>,
-  document.getElementById('app'),
-);
+preloadReady().then(() => {
+  ReactDOM.hydrate(
+    <Provider store={store} key="provider">
+      <Router history={browserHistory}>
+        <Routes />
+      </Router>
+    </Provider>,
+    document.getElementById('app'),
+  );
+});

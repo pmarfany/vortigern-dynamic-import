@@ -25,6 +25,8 @@
     ],
     "jsx-alignment": [
       false
-    ]
+    ],
+    "jsx-no-lambda": false,
+    "jsx-no-multiline-js": false
   }
 }

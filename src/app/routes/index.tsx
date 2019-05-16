@@ -4,7 +4,8 @@ import {About, App, Home} from 'containers';
 
 export default () => (
   <App>
-    <Route path="/about" component={About} />
+    {/*<Route path="/about" component={About} />*/}
+    <About />
     <Route path="/" exact={true} component={Home} />
   </App>
 );
